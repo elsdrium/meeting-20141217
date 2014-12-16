@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of fermion_matrix</title>
+  <meta name="keywords" content="fermion_matrix">
+  <meta name="description" content="usage:  psi1 = fermion_matrix(psi0,U,Ud,Comm,Nc,mass,gi,gv)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html MatlabMonteCarlo -->
+<h1>fermion_matrix
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>usage:  psi1 = fermion_matrix(psi0,U,Ud,Comm,Nc,mass,gi,gv)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function psi1 = fermion_matrix(psi0,U,Ud,Comm,Nc,mass,gi,gv) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> usage:  psi1 = fermion_matrix(psi0,U,Ud,Comm,Nc,mass,gi,gv)
+ where:  Comm=communicator (see init_geometry);
+         Nc = number of colors (SU(Nc) gauge group in fund. rep);
+         U= gauge configuration. It must be a structure U(D,V).m(Nc,Nc);
+         Ud = U^dag obtained with Udag.m (borders are not needed).
+         psi0= spinorial vector psi0(Nc,S,V);
+         S= dim of Dirac spin rep. (=2^(floor(D/2));</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a>	FF = exchange_fields(FF,Comm,MaxNumEdg)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="fermion_matrix_herm.html" class="code" title="function psi1 = fermion_matrix_herm(psi0,U,Ud,Comm,Nc,mass,gi,gv)">fermion_matrix_herm</a>	usage:  psi1 = fermion_matrix_herm(psi0,U,Ud,Comm,Nc,mass,gi,gv);</li><li><a href="main_measure.html" class="code" title="">main_measure</a>	define L's, gauge-group, gauge-rep, chem-pot. gauge coupling, mass(es)</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function psi1 = fermion_matrix(psi0,U,Ud,Comm,Nc,mass,gi,gv)</a>
+0002 <span class="comment">% usage:  psi1 = fermion_matrix(psi0,U,Ud,Comm,Nc,mass,gi,gv)</span>
+0003 <span class="comment">% where:  Comm=communicator (see init_geometry);</span>
+0004 <span class="comment">%         Nc = number of colors (SU(Nc) gauge group in fund. rep);</span>
+0005 <span class="comment">%         U= gauge configuration. It must be a structure U(D,V).m(Nc,Nc);</span>
+0006 <span class="comment">%         Ud = U^dag obtained with Udag.m (borders are not needed).</span>
+0007 <span class="comment">%         psi0= spinorial vector psi0(Nc,S,V);</span>
+0008 <span class="comment">%         S= dim of Dirac spin rep. (=2^(floor(D/2));</span>
+0009 
+0010 rW=1;
+0011 EL=Comm.el;
+0012 Ext_Ind=Comm.extind;
+0013 EV=prod(EL);
+0014 D=length(EL);
+0015 S=2^(floor(D/2));
+0016 UP=1;
+0017 DN=2;
+0018 
+0019 
+0020 psi1(:,:,Ext_Ind)=(D*rW + mass) * psi0(:,:,Ext_Ind);
+0021 
+0022 <span class="keyword">for</span> mu=1:D
+0023   <span class="keyword">for</span> s=1:S
+0024     p_up=Neigh(Ext_Ind,mu,UP);
+0025     p_dn=Neigh(Ext_Ind,mu,DN);
+0026     Xid(:,s,Ext_Ind,mu) = rW * psi0(:,s,p_dn) + gv(mu,s) * psi0(:,gi(mu,s),p_dn);
+0027     Xiu(:,s,Ext_Ind,mu) = rW * psi0(:,s,p_up) - gv(mu,s) * psi0(:,gi(mu,s),p_up);
+0028   <span class="keyword">end</span>
+0029 <span class="keyword">end</span>
+0030 
+0031 <span class="keyword">for</span> s=1:S
+0032   <span class="keyword">for</span> c=1:Nc
+0033    tens(:,Ext_Ind,:,c,s) =  (squeeze(Ud(c,:,:,Ext_Ind)) .* squeeze(Xid(:,s,Ext_Ind,:)) + <span class="keyword">...</span>
+0034                  squeeze(U(c,:,:,Ext_Ind)) .* squeeze(Xiu(:,s,Ext_Ind,:)));
+0035   <span class="keyword">end</span>
+0036 <span class="keyword">end</span>
+0037 
+0038 <span class="keyword">for</span> s=1:S
+0039   <span class="keyword">for</span> c=1:Nc
+0040     tens1(Ext_Ind,c,s) = squeeze(sum(sum(tens(:,Ext_Ind,:,c,s),3),1));
+0041   <span class="keyword">end</span>
+0042 <span class="keyword">end</span>
+0043 psi1(:,:,Ext_Ind) = psi1(:,:,Ext_Ind) + permute(tens1(Ext_Ind,:,:),[2,3,1]);
+0044 
+0045 <span class="comment">% communications (no need of edges)</span>
+0046 <span class="keyword">if</span> (Comm.flag ==1)
+0047   psi1=reshape(<a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a>(reshape(psi1,Nc*S,EV),Comm,1),Nc,S,EV);
+0048 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 16-Dec-2014 01:16:52 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

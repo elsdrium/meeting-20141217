@@ -1,0 +1,58 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of tensor</title>
+  <meta name="keywords" content="tensor">
+  <meta name="description" content="TENSOR Tensor product">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html MatlabMonteCarlo -->
+<h1>tensor
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>TENSOR Tensor product</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function c= tensor(a,b) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> TENSOR Tensor product
+ if X and Y are 2 dimensional arrays, 
+ Z=TENSOR(X,Y) is the tensor product of X and Y
+ i.e. Z(i,j,k,l) = X(i,j) * Y(k,l)</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="MolecularDynamics.html" class="code" title="function U = MolecularDynamics(U,@Mh,beta,ge,Nc,dt,N_MD,Comm)">MolecularDynamics</a>	U = MoleculerDynamics(U,@Mh,beta,ge,Nc,dt,N_MD,Comm)</li><li><a href="MolecularDynamicsRPhi.html" class="code" title="function U = MolecularDynamicsRPhi(U,@Mh,beta,ge,Nc,Nf,Nadj,dt,N_MD,algo,Comm)">MolecularDynamicsRPhi</a>	U = MoleculerDynamicsRPhi(U,@Mh,beta,ge,Nc,Nf,Nadj,dt,N_MD,algo,Comm)</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function c= tensor(a,b)</a>
+0002 <span class="comment">% TENSOR Tensor product</span>
+0003 <span class="comment">% if X and Y are 2 dimensional arrays,</span>
+0004 <span class="comment">% Z=TENSOR(X,Y) is the tensor product of X and Y</span>
+0005 <span class="comment">% i.e. Z(i,j,k,l) = X(i,j) * Y(k,l)</span>
+0006 
+0007 c=permute(reshape(kron(a,b),size(b,1),size(a,1),size(b,2),size(a,2)),[2 4 1 3]);
+0008 
+0009</pre></div>
+<hr><address>Generated on Tue 16-Dec-2014 01:16:52 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

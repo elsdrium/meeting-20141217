@@ -1,0 +1,172 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of MolecularDynamicsRPhi</title>
+  <meta name="keywords" content="MolecularDynamicsRPhi">
+  <meta name="description" content="U = MoleculerDynamicsRPhi(U,@Mh,beta,ge,Nc,Nf,Nadj,dt,N_MD,algo,Comm)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html MatlabMonteCarlo -->
+<h1>MolecularDynamicsRPhi
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>U = MoleculerDynamicsRPhi(U,@Mh,beta,ge,Nc,Nf,Nadj,dt,N_MD,algo,Comm)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function U = MolecularDynamicsRPhi(U,@Mh,beta,ge,Nc,Nf,Nadj,dt,N_MD,algo,Comm) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> U = MoleculerDynamicsRPhi(U,@Mh,beta,ge,Nc,Nf,Nadj,dt,N_MD,algo,Comm)
+
+ Phi- and R-algorithms as described in Ref. Gottlieb et. al. Phys. Rev. D35 (1987) 2531
+ R-algorithm follows exactly the description of pag. 2539 of that paper.
+ For the Phi-algorithm I actually write a version which is as near as possible to the  R-algorithm
+ (in particular, U lives in midpoints and H in the endpoints of the dt intervals).
+ Phi-algorithm with N_MD=1 coincides with a Langevin algorithm, although made of 2 half steps.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="Udag.html" class="code" title="function Ud = Udag(U,Comm)">Udag</a>	Ud = Udag(U,L,Neigh,Ext_Ind)</li><li><a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a>	FF = exchange_fields(FF,Comm,MaxNumEdg)</li><li><a href="staples_1x1.html" class="code" title="function stap = staples_1x1(U,Comm,needforlarger)">staples_1x1</a>	stap = staples_1x1(U,Comm,needforlarger)</li><li><a href="tensor.html" class="code" title="function c= tensor(a,b)">tensor</a>	TENSOR Tensor product</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function U = MolecularDynamicsRPhi(U,@Mh,beta,ge,Nc,Nf,Nadj,dt,N_MD,algo,Comm)</a>
+0002 <span class="comment">% U = MoleculerDynamicsRPhi(U,@Mh,beta,ge,Nc,Nf,Nadj,dt,N_MD,algo,Comm)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Phi- and R-algorithms as described in Ref. Gottlieb et. al. Phys. Rev. D35 (1987) 2531</span>
+0005 <span class="comment">% R-algorithm follows exactly the description of pag. 2539 of that paper.</span>
+0006 <span class="comment">% For the Phi-algorithm I actually write a version which is as near as possible to the  R-algorithm</span>
+0007 <span class="comment">% (in particular, U lives in midpoints and H in the endpoints of the dt intervals).</span>
+0008 <span class="comment">% Phi-algorithm with N_MD=1 coincides with a Langevin algorithm, although made of 2 half steps.</span>
+0009 
+0010 L=Comm.l;
+0011 D=length(L);
+0012 V=prod(L);
+0013 S=2^(floor(D/2));
+0014 EV=prod(Comm.el);
+0015 tol=1e-6;
+0016 maxit=1e4;
+0017 
+0018 <span class="keyword">if</span> (algo==<span class="string">'Phi'</span>)
+0019  Nf=0; <span class="comment">%in Phi-algo, Nf is not a real parameter. The number of fermions is determined by the fermion matrix</span>
+0020 <span class="keyword">end</span>
+0021 
+0022 <span class="comment">% (0) &quot;Now let us begin with U(t) and a newly refreshed H(t)</span>
+0023 hh=(randn(Nadj,V,D) + i * randn(Nadj,V,D))/sqrt(2);
+0024 H=zeros(Nc,Nc,V,D);
+0025 <span class="keyword">for</span> a=1:Nadj
+0026  H = H + <a href="tensor.html" class="code" title="function c= tensor(a,b)">tensor</a>(ge(:,:,a),hh(a,:,:));
+0027 <span class="keyword">end</span>
+0028 
+0029 <span class="comment">% (1) generate an internediate U</span>
+0030 <span class="comment">% R-algo: U(t+ (0.5 - Nf/8) dt) = exp(i (0.5 - Nf/8) dt H(t)) U(t)   Eq. (48)</span>
+0031 <span class="comment">% Phi-algo: U(t+ dt/2) = exp(i  dt/2 H(t)) U(t)</span>
+0032 Dt=i * dt * (0.5 - Nf/8);
+0033 <span class="keyword">for</span> mu=1:D
+0034  <span class="keyword">for</span> x=1:V
+0035   U(:,:,mu,x)=expm( Dt * H(:,:,mu,x)) * U(:,:,mu,x);
+0036  <span class="keyword">end</span>
+0037 <span class="keyword">end</span>
+0038 U = reshape(<a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a>(reshape(U,Nc*Nc*D,EV),Comm,2),Nc,Nc,D,EV);
+0039 Ud=<a href="Udag.html" class="code" title="function Ud = Udag(U,Comm)">Udag</a>(U,Comm);
+0040 
+0041 <span class="comment">% (2-Phi) In Phi-algo the Phi field is generated at the beginning and kept fixed along the MD evolution</span>
+0042 <span class="keyword">if</span> (algo==<span class="string">'Phi'</span>) 
+0043  R_field = (randn(Nc,S,V) + i * randn(Nc,S,V))/sqrt(2); <span class="comment">% normalization?</span>
+0044  Phi = Mh(R_field,U,Ud); <span class="comment">% Eq. (7)</span>
+0045 <span class="keyword">end</span>
+0046 
+0047 X=Phi;
+0048 <span class="keyword">for</span> n=1:N_MD <span class="comment">%%%%%%%%%%% start Molecular Dynamics loop.</span>
+0049 
+0050  <span class="keyword">if</span> (algo==<span class="string">'R'</span>) <span class="comment">% In R-algo the Phi field is generated new at each MD step.</span>
+0051   <span class="comment">% (2-R) Generate a gaussian random vector R and an intermediate vector \Phi.</span>
+0052   <span class="comment">% with distribution  P(\Phi)=e^{-\Phi^d (M^dM)^-1 \Phi}</span>
+0053   R_field = (randn(Nc,S,V) + i * randn(Nc,S,V))/sqrt(2); <span class="comment">% normalization?</span>
+0054   Phi = Mh(R_field,U,Ud); <span class="comment">% Eq. (49)</span>
+0055 
+0056   <span class="comment">% (3-R) compute U at the midpoint</span>
+0057   <span class="comment">% U(t + dt/2) = exp(i (Nf/8) dt H(t)) U(t + (0.5 - Nf/8) dt)   Eq. (50)</span>
+0058   Dt=i * dt * Nf/8;
+0059   <span class="keyword">for</span> mu=1:D
+0060    <span class="keyword">for</span> x=1:V
+0061      U(:,:,mu,x)=expm( Dt * H(:,:,mu,x)) * U(:,:,mu,x);
+0062    <span class="keyword">end</span>
+0063   <span class="keyword">end</span>
+0064  <span class="keyword">end</span>
+0065  U = reshape(<a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a>(reshape(U,Nc*Nc*D,EV),Comm,2),Nc,Nc,D,EV);
+0066  Ud=<a href="Udag.html" class="code" title="function Ud = Udag(U,Comm)">Udag</a>(U,Comm);
+0067 
+0068  <span class="comment">% (4) Compute X</span>
+0069  <span class="comment">% X = inv(MdM) \Phi Eq. (51))</span>
+0070  MdM = @(p_)Mh(Mh(p_,U,Ud),U,Ud); <span class="comment">% handel to the fermion matrix squared.</span>
+0071  X= cgs(@MdM,Phi,tol,maxit);  <span class="comment">%% Need Parallel solvers!!!</span>
+0072                   <span class="comment">%% start from previous solution as a guess if Phi algo is used. !!!</span>
+0073                   <span class="comment">%%  X = CGS(@MdM,Phi,tol,maxit,[],[],X)</span>
+0074 
+0075  <span class="comment">% (5) Use Eq. (46) and (47) to compute dH/dt</span>
+0076  stap=<a href="staples_1x1.html" class="code" title="function stap = staples_1x1(U,Comm,needforlarger)">staples_1x1</a>(U,Comm,0);
+0077  dh = zeros(Nc,Nc);
+0078  beta_ov_nc=beta/Nc;
+0079  <span class="keyword">for</span> mu=1:D
+0080   <span class="keyword">for</span> x=1:V
+0081    <span class="comment">% (5-gauge)</span>
+0082    dh = beta_ov_nc * U(:,:,mu,x) * stap(:,:,mu,x);
+0083    <span class="comment">% (5-ferm)</span>
+0084    <span class="comment">%%%%%%%%%% SEGNO</span>
+0085    dh=dh + ??
+0086    <span class="comment">% traceless anti-hermitean part</span>
+0087    dh=0.5(dh - dh');
+0088    dH(:,:,mu,x) = dh - trace(dh)/Nc;
+0089   <span class="keyword">end</span>
+0090  <span class="keyword">end</span>
+0091 
+0092  <span class="comment">% (6) Compute H(t+dt)</span>
+0093  H = H + dH; <span class="comment">% Eq. (52)</span>
+0094 
+0095  <span class="comment">% (7)</span>
+0096  <span class="keyword">if</span>(n&lt;N_MD) <span class="comment">% Unless this is the last time step ...</span>
+0097         <span class="comment">% ... compute U at the next intermediate point.</span>
+0098         <span class="comment">% R-algo: U(t + dt + (0.5-Nf/8) dt) = exp(i (1 - Nf/8) dt H(t+dt)) U(t+dt/2))   Eq. (53)</span>
+0099         <span class="comment">% Phi-algo: U(t + dt/2 + dt) = exp(i dt H(t+dt)) U(t+dt/2))</span>
+0100   Dt=i * dt * (1.0 - Nf/8);
+0101   <span class="keyword">for</span> mu=1:D
+0102    <span class="keyword">for</span> x=1:V
+0103     U(:,:,mu,x)=expm( Dt * H(:,:,mu,x)) * U(:,:,mu,x);
+0104    <span class="keyword">end</span>
+0105   <span class="keyword">end</span>
+0106   U = reshape(<a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a>(reshape(U,Nc*Nc*D,EV),Comm,2),Nc,Nc,D,EV);
+0107   Ud=<a href="Udag.html" class="code" title="function Ud = Udag(U,Comm)">Udag</a>(U,Comm);
+0108  <span class="keyword">else</span>
+0109   <span class="comment">% Otherwise finish up neatly by computing U(t+N dt).</span>
+0110   <span class="comment">% U(t + N dt) = exp(i dt/2 H(t+dt)) U(t + (N-1/2) dt))   Eq. (54)</span>
+0111   Dt=i * dt/2;
+0112   <span class="keyword">for</span> mu=1:D
+0113    <span class="keyword">for</span> x=1:V
+0114     U(:,:,mu,x)=expm( Dt * H(:,:,mu,x)) * U(:,:,mu,x);
+0115    <span class="keyword">end</span>
+0116   <span class="keyword">end</span>
+0117   U = reshape(<a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a>(reshape(U,Nc*Nc*D,EV),Comm,2),Nc,Nc,D,EV);
+0118   Ud=<a href="Udag.html" class="code" title="function Ud = Udag(U,Comm)">Udag</a>(U,Comm);
+0119  <span class="keyword">end</span> <span class="comment">% if (n&lt;N_MD)</span>
+0120 <span class="keyword">end</span> <span class="comment">%%%%%%%%%%%%% End Molecular Dynamics loop     for n=1:N_MD</span></pre></div>
+<hr><address>Generated on Tue 16-Dec-2014 01:16:52 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

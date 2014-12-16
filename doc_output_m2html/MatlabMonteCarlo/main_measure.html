@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of main_measure</title>
+  <meta name="keywords" content="main_measure">
+  <meta name="description" content="define L's, gauge-group, gauge-rep, chem-pot. gauge coupling, mass(es)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html MatlabMonteCarlo -->
+<h1>main_measure
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>define L's, gauge-group, gauge-rep, chem-pot. gauge coupling, mass(es)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> define L's, gauge-group, gauge-rep, chem-pot. gauge coupling, mass(es)
+ (regularization), (background-metric),</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="cliff_gen.html" class="code" title="function [gi, gv, soi, sov, G, SO] = cliff_gen(t,s)">cliff_gen</a>	gamma matrices and so(t,s) generators with space-time metric (t(-),s(+))</li><li><a href="fermion_matrix.html" class="code" title="function psi1 = fermion_matrix(psi0,U,Ud,Comm,Nc,mass,gi,gv)">fermion_matrix</a>	usage:  psi1 = fermion_matrix(psi0,U,Ud,Comm,Nc,mass,gi,gv)</li><li><a href="init_gauge_fields.html" class="code" title="function U = init_gauge_fields(Nc, init_flag,alpha,filename,Comm)">init_gauge_fields</a>	U = init_gauge_fields(Nc, init_flag,alpha,filename,Comm)</li><li><a href="init_geometry.html" class="code" title="function Comm = init_geometry(GL,Nodes,indexord,thick)">init_geometry</a>	Comm = init_geometry(GL,Nodes,indexord,thick)</li><li><a href="init_spinor_field.html" class="code" title="function [psi] = init_spinor_field(Nc, Comm, init_flag, norm,filename)">init_spinor_field</a>	init_flag      -1 (readin from filaname)</li><li><a href="sun_gen.html" class="code" title="function [a] = sun_gen(N,norm)">sun_gen</a>	if a = sun_gen(N,norm)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% define L's, gauge-group, gauge-rep, chem-pot. gauge coupling, mass(es)</span>
+0002 <span class="comment">% (regularization), (background-metric),</span>
+0003 GL=[4 4 4 4];
+0004 Nodes=[2 2 1 1];
+0005 Nc=3;
+0006 mass=0.1;
+0007 N_meas=1;
+0008 alpha=0.01;
+0009 D=length(L);
+0010 V=prod(L);
+0011 S=2^(floor(D/2));
+0012 indexord=fliplr([1:D]); <span class="comment">% here I decide which is the slowest and fastest direction in loops.</span>
+0013 
+0014 <span class="comment">% init nearest neighbours  (geometry)</span>
+0015 [Neigh Ext_Ind L EL] = <a href="init_geometry.html" class="code" title="function Comm = init_geometry(GL,Nodes,indexord,thick)">init_geometry</a>(GL,Nodes,indexord);
+0016 
+0017 <span class="comment">% build SU(Nc) generators.</span>
+0018 ge=<a href="sun_gen.html" class="code" title="function [a] = sun_gen(N,norm)">sun_gen</a>(Nc,2);  <span class="comment">%%%</span>
+0019 
+0020 <span class="comment">% build D dimensional gamma matrices.</span>
+0021 [gi gv ] = <a href="cliff_gen.html" class="code" title="function [gi, gv, soi, sov, G, SO] = cliff_gen(t,s)">cliff_gen</a>(0,D);  <span class="comment">%%</span>
+0022 
+0023 <span class="comment">% start loop over configurations to be measured</span>
+0024 <span class="keyword">for</span> j=1:N_meas
+0025 
+0026 <span class="comment">% read gauge configuration U(t0)</span>
+0027 gauge_init_flag=-1; <span class="comment">% random</span>
+0028 [U Ud]= <a href="init_gauge_fields.html" class="code" title="function U = init_gauge_fields(Nc, init_flag,alpha,filename,Comm)">init_gauge_fields</a>(ge,L,gauge_init_flag,alpha,<span class="string">'gauge.mat'</span>);
+0029 
+0030 <span class="comment">% gauge measurements (Wloops, Polyakov)</span>
+0031 
+0032 <span class="comment">% test</span>
+0033 ss=[1, 1, 57]
+0034 spin_init_flag=2;
+0035 pp = <a href="init_spinor_field.html" class="code" title="function [psi] = init_spinor_field(Nc, Comm, init_flag, norm,filename)">init_spinor_field</a>(Nc,L,spin_init_flag,ss,[],[]);
+0036 <span class="keyword">for</span> j=1:20
+0037   pp= <a href="fermion_matrix.html" class="code" title="function psi1 = fermion_matrix(psi0,U,Ud,Comm,Nc,mass,gi,gv)">fermion_matrix</a>(pp,L,Nc,mass,2);
+0038 <span class="keyword">end</span>
+0039 <span class="keyword">for</span> j=1:20
+0040   pp= <a href="fermion_matrix.html" class="code" title="function psi1 = fermion_matrix(psi0,U,Ud,Comm,Nc,mass,gi,gv)">fermion_matrix</a>(pp,L,Nc,mass,0);
+0041 <span class="keyword">end</span>
+0042 <span class="keyword">for</span> j=1:20
+0043   pp= <a href="fermion_matrix.html" class="code" title="function psi1 = fermion_matrix(psi0,U,Ud,Comm,Nc,mass,gi,gv)">fermion_matrix</a>(pp,L,Nc,mass,1);
+0044 <span class="keyword">end</span>
+0045 save pp
+0046 
+0047 <span class="keyword">return</span>
+0048 
+0049 <span class="comment">% compute propagator</span>
+0050 tol=1e-6;
+0051 maxit=200;
+0052 modelfun=@(p)reshape(<a href="fermion_matrix.html" class="code" title="function psi1 = fermion_matrix(psi0,U,Ud,Comm,Nc,mass,gi,gv)">fermion_matrix</a>(reshape(p,Nc,S,V),L,Nc,mass,TYPE),Nc*S*V,1);
+0053 
+0054 
+0055 <span class="comment">%ss=[1, 1, ceil(rand*V)]</span>
+0056 ss=[1, 1, 57]
+0057 spin_init_flag=2;
+0058 <span class="keyword">for</span> is=1:1 <span class="comment">% S</span>
+0059   <span class="keyword">for</span> ic=1:1 <span class="comment">% Nc</span>
+0060     ss(1:2) = [ic,is];
+0061     source = reshape(<a href="init_spinor_field.html" class="code" title="function [psi] = init_spinor_field(Nc, Comm, init_flag, norm,filename)">init_spinor_field</a>(Nc,L,spin_init_flag,ss,[],[]),Nc*S*V,1);
+0062     temp = bicgstab(modelfun,source,tol,maxit,[],[],source);
+0063     prop(ic,is,:,:,:)=reshape(temp,Nc,S,V);
+0064   <span class="keyword">end</span>
+0065 <span class="keyword">end</span>
+0066 
+0067 
+0068 <span class="comment">% compute correlators</span>
+0069 
+0070 <span class="comment">% save results</span>
+0071 save gauge.mat U 
+0072 save prop.mat prop
+0073 <span class="keyword">end</span>
+0074</pre></div>
+<hr><address>Generated on Tue 16-Dec-2014 01:16:52 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

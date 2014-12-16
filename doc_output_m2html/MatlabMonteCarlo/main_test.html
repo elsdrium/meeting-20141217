@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of main_test</title>
+  <meta name="keywords" content="main_test">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html MatlabMonteCarlo -->
+<h1>main_test
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="init_gauge_fields.html" class="code" title="function U = init_gauge_fields(Nc, init_flag,alpha,filename,Comm)">init_gauge_fields</a>	U = init_gauge_fields(Nc, init_flag,alpha,filename,Comm)</li><li><a href="init_geometry.html" class="code" title="function Comm = init_geometry(GL,Nodes,indexord,thick)">init_geometry</a>	Comm = init_geometry(GL,Nodes,indexord,thick)</li><li><a href="sun_gen.html" class="code" title="function [a] = sun_gen(N,norm)">sun_gen</a>	if a = sun_gen(N,norm)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 GL=[4 4 4 8]; <span class="comment">% sizes of the global physical lattice</span>
+0002 Nodes=[1 1 1 1]; <span class="comment">% number of processors in which each direction is subdivided.</span>
+0003 Nc=3; <span class="comment">% su(Nc) gauge group</span>
+0004 Nf=2; <span class="comment">% number of flavours</span>
+0005 beta=6.0;
+0006 mass=0.01;
+0007 N_traj=10;
+0008 N_MD=10;
+0009 metric=[1 1 1 1];
+0010 init_flag=1; <span class="comment">%1: start from random (with spread rnd_gauge_sprd); -1 readin file gauge_conf_file.</span>
+0011 rnd_gauge_sprd=0.3;
+0012 gauge_conf_file=[];
+0013 time_dir=4;
+0014 D=length(GL);
+0015 indexord=fliplr([1:D]); <span class="comment">% here I decide which is the slowest and fastest direction in loops.</span>
+0016 
+0017 <span class="comment">%%%%%%%%%%%%%%%%%% SET PARAMETERS ONLY ABOVE THIS LINE</span>
+0018 
+0019 <span class="comment">% variables</span>
+0020 GV=prod(GL);
+0021 T=GL(time_dir);
+0022 dt=0.5/N_MD;
+0023 S=2^(floor(D/2));
+0024 Nadj=Nc^2-1; 
+0025 ge=<a href="sun_gen.html" class="code" title="function [a] = sun_gen(N,norm)">sun_gen</a>(Nc,2);
+0026 
+0027 <span class="comment">% init nearest neighbour (and MPI if necessary)</span>
+0028 comm = <a href="init_geometry.html" class="code" title="function Comm = init_geometry(GL,Nodes,indexord,thick)">init_geometry</a>(L,Nodes,indexord,1);
+0029 
+0030 <span class="comment">% init gauge</span>
+0031 U = <a href="init_gauge_fields.html" class="code" title="function U = init_gauge_fields(Nc, init_flag,alpha,filename,Comm)">init_gauge_fields</a>(Nc,init_flag,rnd_gauge_sprd,gauge_conf_file,comm);
+0032 
+0033 <span class="comment">% communications</span></pre></div>
+<hr><address>Generated on Tue 16-Dec-2014 01:16:52 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of MolecularDynamics</title>
+  <meta name="keywords" content="MolecularDynamics">
+  <meta name="description" content="U = MoleculerDynamics(U,@Mh,beta,ge,Nc,dt,N_MD,Comm)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html MatlabMonteCarlo -->
+<h1>MolecularDynamics
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>U = MoleculerDynamics(U,@Mh,beta,ge,Nc,dt,N_MD,Comm)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function U = MolecularDynamics(U,@Mh,beta,ge,Nc,dt,N_MD,Comm) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> U = MoleculerDynamics(U,@Mh,beta,ge,Nc,dt,N_MD,Comm)</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="Udag.html" class="code" title="function Ud = Udag(U,Comm)">Udag</a>	Ud = Udag(U,L,Neigh,Ext_Ind)</li><li><a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a>	FF = exchange_fields(FF,Comm,MaxNumEdg)</li><li><a href="staples_1x1.html" class="code" title="function stap = staples_1x1(U,Comm,needforlarger)">staples_1x1</a>	stap = staples_1x1(U,Comm,needforlarger)</li><li><a href="tensor.html" class="code" title="function c= tensor(a,b)">tensor</a>	TENSOR Tensor product</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="main_update.html" class="code" title="">main_update</a>	define GL's, gauge-group, gauge-rep, chem-pot. gauge coupling, mass(es)</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function U = MolecularDynamics(U,@Mh,beta,ge,Nc,dt,N_MD,Comm)</a>
+0002 <span class="comment">% U = MoleculerDynamics(U,@Mh,beta,ge,Nc,dt,N_MD,Comm)</span>
+0003 <span class="comment">%</span>
+0004 
+0005 L=Comm.l;
+0006 D=length(L);
+0007 V=prod(L);
+0008 S=2^(floor(D/2));
+0009 EV=prod(Comm.el);
+0010 tol=1e-6;
+0011 maxit=1e4;
+0012 comloc=Comm;
+0013 Nadj=Nc^2-1;
+0014 epsilon=1e-6;
+0015 UP=1;
+0016 Ud=<a href="Udag.html" class="code" title="function Ud = Udag(U,Comm)">Udag</a>(U,Comm);
+0017 
+0018 <span class="keyword">for</span> a=1:Nadj
+0019   uge(:,:,a)=expm(i * epsilon * ge(:,:,a));
+0020 <span class="keyword">end</span>
+0021 
+0022 <span class="comment">% 1. Pseudofermions</span>
+0023 R_field = (randn(Nc,S,EV) + i * randn(Nc,S,EV))/sqrt(2); <span class="comment">% check normalization ?!?</span>
+0024 Phi = Mh(R_field,U,Ud,Comm);
+0025 
+0026 <span class="comment">% 2. Conjugate fields</span>
+0027 hh=(randn(Nadj,V,D) + i * randn(Nadj,V,D))/sqrt(2);
+0028 H=zeros(Nc,Nc,V,D);
+0029 <span class="keyword">for</span> a=1:Nadj
+0030   H = H + <a href="tensor.html" class="code" title="function c= tensor(a,b)">tensor</a>(ge(:,:,a),hh(a,:,:));
+0031 <span class="keyword">end</span>
+0032 
+0033 
+0034 <span class="comment">% 3. Initial half step in position U(dt/2) = exp(i  dt/2 H(0)) U(0)</span>
+0035 Dt=i * dt * (0.5);
+0036 <span class="keyword">for</span> mu=1:D
+0037   <span class="keyword">for</span> x=1:V
+0038     U(:,:,mu,x)=expm( Dt * H(:,:,mu,x)) * U(:,:,mu,x);
+0039   <span class="keyword">end</span>
+0040 <span class="keyword">end</span>
+0041 U = reshape(<a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a>(reshape(U,Nc*Nc*D,EV),Comm,2),Nc,Nc,D,EV);
+0042 Ud=<a href="Udag.html" class="code" title="function Ud = Udag(U,Comm)">Udag</a>(U,Comm);
+0043 
+0044 X=Phi;
+0045 <span class="keyword">for</span> k=0:N_MD-1 <span class="comment">%%%%%%%%%%% start Molecular Dynamics loop.</span>
+0046   
+0047   <span class="comment">% 4. Compute the Force in the middle points</span>
+0048   <span class="comment">% 4.a first prepare the gauge part</span>
+0049   
+0050   stap=<a href="staples_1x1.html" class="code" title="function stap = staples_1x1(U,Comm,needforlarger)">staples_1x1</a>(U,Comm,0);
+0051   dh = zeros(Nc,Nc);
+0052   beta_ov_nc=beta/Nc;
+0053   
+0054   <span class="comment">% 4.b then Compute X = inv(MdM) Phi</span>
+0055   MdM = @(p_)Mh(Mh(p_,U,Ud,Comm),U,Ud,Comm); <span class="comment">% handel to the fermion matrix squared.</span>
+0056   X = cgs(@MdM,Phi,tol,maxit,[],[],X);  <span class="comment">%% Need Parallel solvers!!!</span>
+0057   MhX = Mh(X,U,Ud,Comm);
+0058 
+0059   U1=U;
+0060   U1d=Ud;
+0061   <span class="keyword">for</span> mu=1:D
+0062     <span class="keyword">for</span> x=1:V
+0063       <span class="comment">% (gauge force)</span>
+0064       dh = beta_ov_nc * U(:,:,mu,x) * stap(:,:,mu,x);
+0065 
+0066       <span class="comment">% (fermionic force)</span>
+0067       comloc.extind=???; <span class="comment">%% SEGNO: still not clear how to restrit the action of Mh (see: ferm_ind_for_force...)</span>
+0068       xup= Comm.neigh(x,mu,UP);
+0069       <span class="keyword">for</span> a = 1:Nadj
+0070     U1(:,:,mu,x) = uge(:,:,a) * U(:,:,mu,x);
+0071     U1d(:,:,mu,xup) = Ud(:,:,mu,xup) * uge(:,:,a)';
+0072     temp = (conj(X(:,:,comloc.extind)) .* (Mh(MhX,U1,U1d,comloc) - Mh(MhX,U,Ud,comloc))/epsilon);
+0073     dh=dh + ge(:,:,a) * 2.0 * real(temp);
+0074       <span class="keyword">end</span>
+0075       
+0076       <span class="comment">% traceless anti-hermitean part</span>
+0077       dh=0.5(dh - dh');
+0078       dH(:,:,mu,x) = dh - trace(dh)/Nc;
+0079     <span class="keyword">end</span>
+0080   <span class="keyword">end</span>
+0081   
+0082   <span class="comment">% 4.c Once the force is computed, add it to H(kdt+dt) = H(kdt) - dt F(kdt + dt/2)</span>
+0083   H = H + dH;
+0084   
+0085   <span class="keyword">if</span>(k&lt;N_MD-1) 
+0086     <span class="comment">% 5.a Unless this is the final step compute U at the next intermediate point.</span>
+0087     <span class="comment">%     U(kdt + 3/2 dt) = exp(i dt H(kdt +dt)) U(kdt + dt/2))</span>
+0088     Dt=i * dt;
+0089     <span class="keyword">for</span> mu=1:D
+0090       <span class="keyword">for</span> x=1:V
+0091     U(:,:,mu,x)=expm( Dt * H(:,:,mu,x)) * U(:,:,mu,x);
+0092       <span class="keyword">end</span>
+0093     <span class="keyword">end</span>
+0094   <span class="keyword">else</span>
+0095     <span class="comment">% 5.b Otherwise, finish up neatly by computing U(N dt).</span>
+0096     <span class="comment">%     U(Ndt) = exp(i dt/2 H(Ndt)) U((N-1/2) dt))</span>
+0097     Dt=i * dt/2;
+0098     <span class="keyword">for</span> mu=1:D
+0099       <span class="keyword">for</span> x=1:V
+0100     U(:,:,mu,x)=expm( Dt * H(:,:,mu,x)) * U(:,:,mu,x);
+0101       <span class="keyword">end</span>
+0102     <span class="keyword">end</span>
+0103   <span class="keyword">end</span> <span class="comment">% if (k&lt;N_MD-1)</span>
+0104   U = reshape(<a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a>(reshape(U,Nc*Nc*D,EV),Comm,2),Nc,Nc,D,EV);
+0105   Ud=<a href="Udag.html" class="code" title="function Ud = Udag(U,Comm)">Udag</a>(U,Comm);
+0106 
+0107 <span class="keyword">end</span> <span class="comment">% End Molecular Dynamics loop     for k=0:N_MD-1</span></pre></div>
+<hr><address>Generated on Tue 16-Dec-2014 01:16:52 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

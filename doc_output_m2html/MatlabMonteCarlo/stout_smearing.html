@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of stout_smearing</title>
+  <meta name="keywords" content="stout_smearing">
+  <meta name="description" content="U = stout_smearing(U,Nc,Comm)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html MatlabMonteCarlo -->
+<h1>stout_smearing
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>U = stout_smearing(U,Nc,Comm)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function U = stout_smearing(U,Nc,Comm) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> U = stout_smearing(U,Nc,Comm)
+ 
+  see Morningstar and Peardon hep-lat/0311018
+  generalized to D dimensions</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a>	FF = exchange_fields(FF,Comm,MaxNumEdg)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function U = stout_smearing(U,Nc,Comm)</a>
+0002 <span class="comment">% U = stout_smearing(U,Nc,Comm)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">%  see Morningstar and Peardon hep-lat/0311018</span>
+0005 <span class="comment">%  generalized to D dimensions</span>
+0006 
+0007 up=1;dn=2;
+0008 L=Comm.l;
+0009 V=prod(L);
+0010 D=length(L);
+0011 rho=0.1;
+0012 rhom=rho * ones(4,4);
+0013 
+0014 alld=[1:D];
+0015 
+0016 <span class="keyword">for</span> epnt = Comm.extind      <span class="comment">% loop on space-time</span>
+0017   <span class="keyword">for</span> mu = 1:D              <span class="comment">% loop on direction of the new link mu</span>
+0018     C_mu=zeros(Nc,Nc);
+0019     orth = alld(find(alld)~=mu); <span class="comment">% = list of all non-mu directions</span>
+0020     <span class="keyword">for</span> nu = orth       <span class="comment">% loop on all the  non-mu directions</span>
+0021       C_mu = C_mu + <span class="keyword">...</span>
+0022          rhom(mu,nu) * (<span class="keyword">...</span>
+0023          U(:,:,nu,epnt)*<span class="keyword">...</span>
+0024          U(:,:,mu,Comm.neigh(epnt,nu,up))*<span class="keyword">...</span>
+0025          U(:,:,nu,Comm.neigh(epnt,mu,up))'+<span class="keyword">...</span>
+0026          U(:,:,nu,Comm.neigh(epnt,nu,dn))' *<span class="keyword">...</span>
+0027          U(:,:,mu,Comm.neigh(epnt,nu,dn))*<span class="keyword">...</span>
+0028          U(:,:,nu,Comm.neigh(Comm.neigh(epnt,nu,dn),mu,up)) );
+0029     <span class="keyword">end</span>
+0030     Omega = C_mu * U(:,:,mu,epnt)';
+0031     dOmega= Omega' - Omega;
+0032     Qmu = 0.5 * dOmega - 0.5/Nc * trace(dOmega) *eye(Nc);
+0033     UU(:,:,mu,epnt)=expm(Qmu) * U(:,:,mu,epnt);
+0034 
+0035   <span class="keyword">end</span>
+0036 <span class="keyword">end</span>
+0037 
+0038 U=reshape(<a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a>(reshape(UU,Nc*Nc*D,EV),Comm,1),Nc,Nc,D,EV)</pre></div>
+<hr><address>Generated on Tue 16-Dec-2014 01:16:52 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

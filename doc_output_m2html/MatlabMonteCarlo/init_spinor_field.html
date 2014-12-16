@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of init_spinor_field</title>
+  <meta name="keywords" content="init_spinor_field">
+  <meta name="description" content="init_flag      -1 (readin from filaname)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html MatlabMonteCarlo -->
+<h1>init_spinor_field
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>init_flag      -1 (readin from filaname)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [psi] = init_spinor_field(Nc, Comm, init_flag, norm,filename) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> init_flag      -1 (readin from filaname) 
+                 0 (filled with zeros)
+                 1 (gaussian and globally normalized to norm)</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="main_measure.html" class="code" title="">main_measure</a>	define L's, gauge-group, gauge-rep, chem-pot. gauge coupling, mass(es)</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [psi] = init_spinor_field(Nc, Comm, init_flag, norm,filename)</a>
+0002 <span class="comment">% init_flag      -1 (readin from filaname)</span>
+0003 <span class="comment">%                 0 (filled with zeros)</span>
+0004 <span class="comment">%                 1 (gaussian and globally normalized to norm)</span>
+0005 
+0006 L=Comm.l;
+0007 EL=Comm.el;
+0008 Ext_Ind=Comm.extind;
+0009 V=prod(L);
+0010 EV=prod(EL)
+0011 D=length(L);
+0012 S=2^(floor(D/2));
+0013 psi=zeros(Nc,S,EV);
+0014 <span class="keyword">if</span> (init_flag == 1)
+0015   psi(:,:,Ext_Ind) = (randn(Nc,S,V) + i * randn(Nc,S,V));
+0016   psi(:,:,Ext_Ind) = psi(:,:,Ext_Ind)/sqrt(V*S*Nc*2);
+0017 <span class="keyword">elseif</span>(init_flag==-1)
+0018   psi=load(filename);
+0019 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 16-Dec-2014 01:16:52 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

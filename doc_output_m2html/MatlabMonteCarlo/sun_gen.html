@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of sun_gen</title>
+  <meta name="keywords" content="sun_gen">
+  <meta name="description" content="if a = sun_gen(N,norm)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html MatlabMonteCarlo -->
+<h1>sun_gen
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>if a = sun_gen(N,norm)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [a] = sun_gen(N,norm) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> if a = sun_gen(N,norm)
+ a(i).m is the i-th (i=1,N^2-1) su(N) generator in the adjoint rep. (generalized Gell-Mann)
+ a(N^2).m is proportional to the identity matrix.
+ they are all normalized as Tr ( a(i).m * a(j).m ) = norm* delta_ij 
+ gell-mann: a=sun_gen(3,2); lambda_3= a(7).m, lambda_8= a(8).m,</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="init_gauge_fields.html" class="code" title="function U = init_gauge_fields(Nc, init_flag,alpha,filename,Comm)">init_gauge_fields</a>	U = init_gauge_fields(Nc, init_flag,alpha,filename,Comm)</li><li><a href="main_measure.html" class="code" title="">main_measure</a>	define L's, gauge-group, gauge-rep, chem-pot. gauge coupling, mass(es)</li><li><a href="main_test.html" class="code" title="">main_test</a>	</li><li><a href="main_update.html" class="code" title="">main_update</a>	define GL's, gauge-group, gauge-rep, chem-pot. gauge coupling, mass(es)</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [a] = sun_gen(N,norm)</a>
+0002 <span class="comment">% if a = sun_gen(N,norm)</span>
+0003 <span class="comment">% a(i).m is the i-th (i=1,N^2-1) su(N) generator in the adjoint rep. (generalized Gell-Mann)</span>
+0004 <span class="comment">% a(N^2).m is proportional to the identity matrix.</span>
+0005 <span class="comment">% they are all normalized as Tr ( a(i).m * a(j).m ) = norm* delta_ij</span>
+0006 <span class="comment">% gell-mann: a=sun_gen(3,2); lambda_3= a(7).m, lambda_8= a(8).m,</span>
+0007 
+0008 <span class="keyword">for</span> n = 1:N^2
+0009  a(:,:,n) = zeros(N);
+0010 <span class="keyword">end</span>
+0011 
+0012 n=1;
+0013 <span class="keyword">for</span> h=1:N
+0014   <span class="keyword">for</span> k=1:h-1
+0015     a(h,k,n) = 1;
+0016     a(k,h,n) = 1;
+0017     n=n+1;
+0018     a(h,k,n) = i;
+0019     a(k,h,n) =-i;
+0020     n=n+1;
+0021   <span class="keyword">end</span>
+0022 <span class="keyword">end</span>
+0023 <span class="comment">% cartan sub-algebra</span>
+0024 <span class="keyword">for</span> k=1:N-1
+0025  a([1:k],[1:k],n) = eye(k); 
+0026  a(k+1,k+1,n) = -k; 
+0027  n=n+1;
+0028 <span class="keyword">end</span>
+0029 
+0030 <span class="comment">% u(1) gen</span>
+0031 a(:,:,N^2) = eye(N);
+0032 
+0033 <span class="comment">% normalization</span>
+0034 <span class="keyword">for</span> n = 1:N^2
+0035  no=trace(a(:,:,n) * a(:,:,n));
+0036  a(:,:,n) = a(:,:,n) * sqrt(norm/no);
+0037 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 16-Dec-2014 01:16:52 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

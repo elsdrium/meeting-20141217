@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of init_gauge_fields</title>
+  <meta name="keywords" content="init_gauge_fields">
+  <meta name="description" content="U = init_gauge_fields(Nc, init_flag,alpha,filename,Comm)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html MatlabMonteCarlo -->
+<h1>init_gauge_fields
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>U = init_gauge_fields(Nc, init_flag,alpha,filename,Comm)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function U = init_gauge_fields(Nc, init_flag,alpha,filename,Comm) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> U = init_gauge_fields(Nc, init_flag,alpha,filename,Comm)
+
+ Initialize a gauge configuration with gauge group SU(Nc)
+ init_flag     1 (random with spread alpha, cold for alpha=0)
+ init_flag    -1 (readin filename)
+ Comm is the communicator structure (see init_geometry.m)
+ Indices are ordered according to: U(Nc,Nc,EV,D).</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a>	FF = exchange_fields(FF,Comm,MaxNumEdg)</li><li><a href="sun_gen.html" class="code" title="function [a] = sun_gen(N,norm)">sun_gen</a>	if a = sun_gen(N,norm)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="main_measure.html" class="code" title="">main_measure</a>	define L's, gauge-group, gauge-rep, chem-pot. gauge coupling, mass(es)</li><li><a href="main_test.html" class="code" title="">main_test</a>	</li><li><a href="main_update.html" class="code" title="">main_update</a>	define GL's, gauge-group, gauge-rep, chem-pot. gauge coupling, mass(es)</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function U = init_gauge_fields(Nc, init_flag,alpha,filename,Comm)</a>
+0002 <span class="comment">% U = init_gauge_fields(Nc, init_flag,alpha,filename,Comm)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Initialize a gauge configuration with gauge group SU(Nc)</span>
+0005 <span class="comment">% init_flag     1 (random with spread alpha, cold for alpha=0)</span>
+0006 <span class="comment">% init_flag    -1 (readin filename)</span>
+0007 <span class="comment">% Comm is the communicator structure (see init_geometry.m)</span>
+0008 <span class="comment">% Indices are ordered according to: U(Nc,Nc,EV,D).</span>
+0009 
+0010 Neigh=Comm.neigh;
+0011 Ext_Ind=Comm.extind;
+0012 L=Comm.l;
+0013 EL=Comm.el;
+0014 V=prod(L);
+0015 EV=prod(EL);
+0016 D=length(L);
+0017 ge=<a href="sun_gen.html" class="code" title="function [a] = sun_gen(N,norm)">sun_gen</a>(Nc,1);
+0018 
+0019 <span class="keyword">if</span> (init_flag == 1)
+0020   <span class="comment">% generate random gauge field</span>
+0021   <span class="keyword">for</span> pnt=1:V
+0022     <span class="keyword">for</span> mu=1:D
+0023       a=0;
+0024       <span class="keyword">for</span> c=1:Nc^2-1
+0025     a = a + ge(:,:,c) * ((rand-0.5)*alpha); 
+0026       <span class="keyword">end</span>
+0027       U(:,:,mu,Ext_Ind(pnt)) = expm(a); 
+0028     <span class="keyword">end</span>
+0029   <span class="keyword">end</span>
+0030 <span class="keyword">elseif</span>(init_flag ==-1)
+0031   <span class="comment">% read gauge field from disk.</span>
+0032   conf=load(filename);
+0033   U=conf.U;
+0034   clear conf
+0035 <span class="keyword">end</span>
+0036 
+0037 <span class="comment">% update boundaries</span>
+0038 max_num_edges=2; <span class="comment">% unless you need some stange higher dim observable</span>
+0039 U = reshape(<a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a>(reshape(U,Nc*Nc*D,EV),Comm,max_num_edges),Nc,Nc,D,EV);</pre></div>
+<hr><address>Generated on Tue 16-Dec-2014 01:16:52 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

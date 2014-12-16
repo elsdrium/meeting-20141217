@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of fermion_matrix_herm</title>
+  <meta name="keywords" content="fermion_matrix_herm">
+  <meta name="description" content="usage:  psi1 = fermion_matrix_herm(psi0,U,Ud,Comm,Nc,mass,gi,gv);">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html MatlabMonteCarlo -->
+<h1>fermion_matrix_herm
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>usage:  psi1 = fermion_matrix_herm(psi0,U,Ud,Comm,Nc,mass,gi,gv);</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function psi1 = fermion_matrix_herm(psi0,U,Ud,Comm,Nc,mass,gi,gv) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> usage:  psi1 = fermion_matrix_herm(psi0,U,Ud,Comm,Nc,mass,gi,gv);
+ where:  L = [LX,LY,LZ,T...];
+         LX = number of point in direction X, LY= ...
+         D=length(L);
+         Nc = number of colors (SU(Nc) gauge group in fund. rep);
+         U= gauge configuration.
+         psi0= spinorial vector psi0(Nc,S,V);
+         S= dim of Dirac spin rep. (=2^(floor(D/2));</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="fermion_matrix.html" class="code" title="function psi1 = fermion_matrix(psi0,U,Ud,Comm,Nc,mass,gi,gv)">fermion_matrix</a>	usage:  psi1 = fermion_matrix(psi0,U,Ud,Comm,Nc,mass,gi,gv)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="main_update.html" class="code" title="">main_update</a>	define GL's, gauge-group, gauge-rep, chem-pot. gauge coupling, mass(es)</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function psi1 = fermion_matrix_herm(psi0,U,Ud,Comm,Nc,mass,gi,gv)</a>
+0002 <span class="comment">% usage:  psi1 = fermion_matrix_herm(psi0,U,Ud,Comm,Nc,mass,gi,gv);</span>
+0003 <span class="comment">% where:  L = [LX,LY,LZ,T...];</span>
+0004 <span class="comment">%         LX = number of point in direction X, LY= ...</span>
+0005 <span class="comment">%         D=length(L);</span>
+0006 <span class="comment">%         Nc = number of colors (SU(Nc) gauge group in fund. rep);</span>
+0007 <span class="comment">%         U= gauge configuration.</span>
+0008 <span class="comment">%         psi0= spinorial vector psi0(Nc,S,V);</span>
+0009 <span class="comment">%         S= dim of Dirac spin rep. (=2^(floor(D/2));</span>
+0010 
+0011 L=Comm.l;
+0012 D=length(L);
+0013 S=2^(floor(D/2));
+0014 
+0015 psi_tmp=<a href="fermion_matrix.html" class="code" title="function psi1 = fermion_matrix(psi0,U,Ud,Comm,Nc,mass,gi,gv)">fermion_matrix</a>(psi0,U,Ud,Comm,Nc,mass,gi,gv);
+0016 <span class="keyword">for</span> s=1:S
+0017  psi1(:,s,:,:)=gv(D+1,s) * psi_tmp(:,gi(D+1,s),:,:); 
+0018 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 16-Dec-2014 01:16:52 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

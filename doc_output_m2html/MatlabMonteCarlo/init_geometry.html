@@ -1,0 +1,227 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of init_geometry</title>
+  <meta name="keywords" content="init_geometry">
+  <meta name="description" content="Comm = init_geometry(GL,Nodes,indexord,thick)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html MatlabMonteCarlo -->
+<h1>init_geometry
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Comm = init_geometry(GL,Nodes,indexord,thick)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function Comm = init_geometry(GL,Nodes,indexord,thick) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Comm = init_geometry(GL,Nodes,indexord,thick)
+
+ INPUTS:
+ GL(mu) = global lattice extension in direction mu;
+ Nodes(mu) = number of computing nodes in which direction mu is distributed;
+ indexord is any permutation of [1:D]. It defines completely which coordinates run slow or fast. 
+       The fastest running direction is indexord(1) and the slowest indexord(D).
+ thick=depth of the border (allows the *direct* construction of observables of linear size 'thick').
+
+ OUTPUTS:
+ Comm is a structure with the following subfields.
+ L(mu) = extension of the local sublattice in direction mu; i.e. L(mu)=GL(mu)/Nodes(mu);
+ EL(mu) = extension in mu-direction of the  'extended lattice' = local lattice + borders.
+ i.e. EL(mu) = L(mu)+2*thick, if direction mu is parallelized; 
+      EL(mu) = L(mu), if direction mu is not parallelized; 
+ Ext_Ind(pnt) is the index (from 1 to EV=prod(EL)) in the extended lattice associated to the 
+       index pnt (from 1 to V=prod(V)) in the local sublattice. 
+ Neigh(epnt,dir,ver) is the index in the extended lattice (from 1 to EV=prod(EL)) of the 
+       nearest Neighbours of epnt, when such neighbour also falls in the extended lattice 
+       (otherwise it is nan).
+ Neigh_Node(mu,up/down) is the rank of the neighbouring node (to the one calling the function) 
+       in direction mu.
+ BndInd is a structure that containes the indices of the borders distributed in a way which is 
+       useful for exchange_fields (see below for the precise organization).
+
+%%%%%% Note:
+ dir is one of the D directions; ver=1(up),2(down);
+
+ see also <a href="coord_basis.html" class="code" title="function [c_basis] = coord_basis(L,indexord)">coord_basis</a>, <a href="index2coord.html" class="code" title="function [coord] = index2coord(index,c_basis,indexord)">index2coord</a>, <a href="coord2index.html" class="code" title="function [index] = coord2index(coord,c_basis)">coord2index</a>, <a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="coord2index.html" class="code" title="function [index] = coord2index(coord,c_basis)">coord2index</a>	[index] = coord2index(coord,c_basis)</li><li><a href="coord_basis.html" class="code" title="function [c_basis] = coord_basis(L,indexord)">coord_basis</a>	[c_basis] = coord_basis(L,indexord)</li><li><a href="index2coord.html" class="code" title="function [coord] = index2coord(index,c_basis,indexord)">index2coord</a>	[coord] = index2coord(index,c_basis,indexord)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="main_measure.html" class="code" title="">main_measure</a>	define L's, gauge-group, gauge-rep, chem-pot. gauge coupling, mass(es)</li><li><a href="main_test.html" class="code" title="">main_test</a>	</li><li><a href="main_update.html" class="code" title="">main_update</a>	define GL's, gauge-group, gauge-rep, chem-pot. gauge coupling, mass(es)</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function Comm = init_geometry(GL,Nodes,indexord,thick)</a>
+0002 <span class="comment">% Comm = init_geometry(GL,Nodes,indexord,thick)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% INPUTS:</span>
+0005 <span class="comment">% GL(mu) = global lattice extension in direction mu;</span>
+0006 <span class="comment">% Nodes(mu) = number of computing nodes in which direction mu is distributed;</span>
+0007 <span class="comment">% indexord is any permutation of [1:D]. It defines completely which coordinates run slow or fast.</span>
+0008 <span class="comment">%       The fastest running direction is indexord(1) and the slowest indexord(D).</span>
+0009 <span class="comment">% thick=depth of the border (allows the *direct* construction of observables of linear size 'thick').</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% OUTPUTS:</span>
+0012 <span class="comment">% Comm is a structure with the following subfields.</span>
+0013 <span class="comment">% L(mu) = extension of the local sublattice in direction mu; i.e. L(mu)=GL(mu)/Nodes(mu);</span>
+0014 <span class="comment">% EL(mu) = extension in mu-direction of the  'extended lattice' = local lattice + borders.</span>
+0015 <span class="comment">% i.e. EL(mu) = L(mu)+2*thick, if direction mu is parallelized;</span>
+0016 <span class="comment">%      EL(mu) = L(mu), if direction mu is not parallelized;</span>
+0017 <span class="comment">% Ext_Ind(pnt) is the index (from 1 to EV=prod(EL)) in the extended lattice associated to the</span>
+0018 <span class="comment">%       index pnt (from 1 to V=prod(V)) in the local sublattice.</span>
+0019 <span class="comment">% Neigh(epnt,dir,ver) is the index in the extended lattice (from 1 to EV=prod(EL)) of the</span>
+0020 <span class="comment">%       nearest Neighbours of epnt, when such neighbour also falls in the extended lattice</span>
+0021 <span class="comment">%       (otherwise it is nan).</span>
+0022 <span class="comment">% Neigh_Node(mu,up/down) is the rank of the neighbouring node (to the one calling the function)</span>
+0023 <span class="comment">%       in direction mu.</span>
+0024 <span class="comment">% BndInd is a structure that containes the indices of the borders distributed in a way which is</span>
+0025 <span class="comment">%       useful for exchange_fields (see below for the precise organization).</span>
+0026 <span class="comment">%</span>
+0027 <span class="comment">%%%%%%% Note:</span>
+0028 <span class="comment">% dir is one of the D directions; ver=1(up),2(down);</span>
+0029 <span class="comment">%</span>
+0030 <span class="comment">% see also coord_basis, index2coord, coord2index, exchange_fields</span>
+0031 
+0032 L=GL./Nodes;
+0033 D=length(L);
+0034 dirs=[1:D];
+0035 par_dirs=find(Nodes&gt;1);
+0036 EL=L; EL(par_dirs)=L(par_dirs)+2*thick; <span class="comment">% Extended Lattice including borders where they are necessary.</span>
+0037 V=prod(L);
+0038 EV=prod(EL);
+0039 cb=<a href="coord_basis.html" class="code" title="function [c_basis] = coord_basis(L,indexord)">coord_basis</a>(L,indexord);
+0040 ecb=<a href="coord_basis.html" class="code" title="function [c_basis] = coord_basis(L,indexord)">coord_basis</a>(EL,indexord);
+0041 viel_bein = eye(D,D);
+0042 sig=[1,-1];
+0043 <span class="keyword">if</span>(any(thick&gt;=L))
+0044  exceed=find(any(thick&gt;=L));
+0045  sprintf(<span class="string">'Borders exceeding the bulk in some directions: %d %d'</span>, exceed) 
+0046 <span class="keyword">end</span>
+0047 
+0048 <span class="comment">%%% 1. Compute Ext_Ind(V)</span>
+0049 <span class="keyword">for</span> pnt=1:V
+0050  coord = <a href="index2coord.html" class="code" title="function [coord] = index2coord(index,c_basis,indexord)">index2coord</a>(pnt,cb,indexord);
+0051  coord(par_dirs) = coord(par_dirs)+thick; <span class="comment">% (x_mu) -&gt; (x_mu + thick) if mu is parallelized.</span>
+0052  Ext_Ind(pnt) = <a href="coord2index.html" class="code" title="function [index] = coord2index(coord,c_basis)">coord2index</a>(coord,ecb);
+0053 <span class="keyword">end</span>
+0054 
+0055 <span class="comment">%%% 2. Compute Neigh(EV,D,2)</span>
+0056 <span class="keyword">for</span> epnt=1:EV
+0057   ecoord=<a href="index2coord.html" class="code" title="function [coord] = index2coord(index,c_basis,indexord)">index2coord</a>(epnt,ecb,indexord);
+0058   <span class="keyword">for</span> mu=1:D
+0059    <span class="keyword">for</span> ver=1:2
+0060     ncoord=ecoord+sig(ver)*viel_bein(mu,:);
+0061     <span class="keyword">if</span>(all(ncoord(par_dirs)&lt;EL(par_dirs)) &amp;&amp; all(ncoord(par_dirs)&gt;=0))<span class="comment">% if the nearest-neighbouring point of epnt</span>
+0062                                       <span class="comment">% (which may already be in the border)</span>
+0063                                       <span class="comment">% is still in the extended lattice.</span>
+0064      Neigh(epnt,mu,ver)=<a href="coord2index.html" class="code" title="function [index] = coord2index(coord,c_basis)">coord2index</a>(mod(ncoord,EL),ecb); <span class="comment">% define Neigh</span>
+0065     <span class="keyword">else</span>
+0066      Neigh(epnt,mu,ver)=nan;
+0067     <span class="keyword">end</span>
+0068    <span class="keyword">end</span>
+0069   <span class="keyword">end</span>
+0070 <span class="keyword">end</span>
+0071 
+0072 <span class="comment">%%%%%%%%%%%%%%%%% The following is needed only in the parallel case.  %%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0073 <span class="keyword">if</span> ( any(L ~= EL) )
+0074 <span class="comment">%%%% 3. Compute Neigh_Node(D,up/dn), which returns the rank of the nodes neighbouring to this one.</span>
+0075 
+0076  NPD=length(par_dirs);
+0077  send=1; recv=2; up=1; dn=2;
+0078  Ncb=<a href="coord_basis.html" class="code" title="function [c_basis] = coord_basis(L,indexord)">coord_basis</a>(Nodes,indexord);
+0079 
+0080  <span class="comment">% MPI_Init;</span>
+0081  <span class="comment">% [info mpi_rank] =  MPI_Comm_rank(MPI_COMM_WORLD);</span>
+0082  mpi_rank =0;
+0083  rank=mpi_rank+1; <span class="comment">% check that rank returned by MPI_Comm_rank actually goes from 0 to num_proc-1 ???</span>
+0084 
+0085  <span class="keyword">for</span> mu=1:D
+0086   <span class="keyword">if</span> (EL(mu)==L(mu))
+0087     Neigh_Node(mu,up)=rank;
+0088     Neigh_Node(mu,dn)=rank;
+0089   <span class="keyword">else</span>
+0090     Neigh_Node(mu,up)=<a href="coord2index.html" class="code" title="function [index] = coord2index(coord,c_basis)">coord2index</a>(mod(<a href="index2coord.html" class="code" title="function [coord] = index2coord(index,c_basis,indexord)">index2coord</a>(rank,Ncb,indexord)+viel_bein(mu,:),Nodes),Ncb);
+0091     Neigh_Node(mu,dn)=<a href="coord2index.html" class="code" title="function [index] = coord2index(coord,c_basis)">coord2index</a>(mod(<a href="index2coord.html" class="code" title="function [coord] = index2coord(index,c_basis,indexord)">index2coord</a>(rank,Ncb,indexord)-viel_bein(mu,:),Nodes),Ncb);
+0092   <span class="keyword">end</span>
+0093  <span class="keyword">end</span>
+0094 
+0095 <span class="comment">%%%% 4. Define the struct BndInd  containing the indices of the fields to be communicated</span>
+0096 
+0097  <span class="keyword">for</span> mu=par_dirs; <span class="comment">% loop on the parallelized dimensions</span>
+0098   <span class="keyword">for</span> en=1:NPD
+0099    eval([<span class="string">'list_dn_recv_'</span> num2str(en) <span class="string">'= [];'</span> ]); <span class="comment">% set temporary variables list_*_*_* to []</span>
+0100    eval([<span class="string">'list_up_recv_'</span> num2str(en) <span class="string">'= [];'</span> ]); 
+0101    eval([<span class="string">'list_dn_send_'</span> num2str(en) <span class="string">'= [];'</span> ]);
+0102    eval([<span class="string">'list_up_send_'</span> num2str(en) <span class="string">'= [];'</span> ]);
+0103   <span class="keyword">end</span>
+0104   other_par_dirs=setdiff(par_dirs,mu);
+0105   oned=ones(1,length(other_par_dirs));
+0106   <span class="keyword">for</span> epnt=1:EV
+0107    ecoord=<a href="index2coord.html" class="code" title="function [coord] = index2coord(index,c_basis,indexord)">index2coord</a>(epnt,ecb,indexord);
+0108    other_par_coord=ecoord(other_par_dirs); 
+0109    edg_num=<span class="keyword">...</span><span class="comment">                             </span>
+0110        length(find((ecoord(other_par_dirs) &lt; thick*oned) | <span class="keyword">...</span>
+0111            (ecoord(other_par_dirs) &gt;= EL(other_par_dirs)-thick*oned)))+1;
+0112    <span class="comment">% edg_num is the number of components in ecoord that live in the  border of the extended lattice.</span>
+0113    <span class="comment">% e.g. corners of a cube have edg_num=3. Note that I need at least edg_num communications steps to</span>
+0114    <span class="comment">% update them; that's why I divide BndInd according to edg_num.</span>
+0115    <span class="keyword">if</span> (ecoord(mu) &lt; thick)
+0116     eval([<span class="string">'list_dn_recv_'</span> num2str(edg_num) <span class="string">'= [list_dn_recv_'</span> num2str(edg_num) <span class="string">'; epnt];'</span> ])
+0117    <span class="keyword">elseif</span> ((thick &lt;= ecoord(mu)) &amp;&amp; (ecoord(mu) &lt; 2*thick))
+0118     eval([<span class="string">'list_dn_send_'</span> num2str(edg_num) <span class="string">'= [list_dn_send_'</span> num2str(edg_num) <span class="string">'; epnt];'</span> ])
+0119    <span class="keyword">elseif</span> ((EL(mu)-2*thick &lt;= ecoord(mu)) &amp;&amp; (ecoord(mu) &lt; EL(mu)-thick))
+0120     eval([<span class="string">'list_up_send_'</span> num2str(edg_num) <span class="string">'= [list_up_send_'</span> num2str(edg_num) <span class="string">'; epnt];'</span> ])
+0121    <span class="keyword">elseif</span> (ecoord(mu) &gt;= EL(mu)-thick)
+0122     eval([<span class="string">'list_up_recv_'</span> num2str(edg_num) <span class="string">'= [list_up_recv_'</span> num2str(edg_num) <span class="string">'; epnt];'</span> ])
+0123    <span class="keyword">end</span>
+0124   <span class="keyword">end</span> <span class="comment">% epnt= 1:EV</span>
+0125 
+0126   <span class="keyword">for</span> en=1:NPD
+0127    eval([<span class="string">'BndInd.en_'</span> num2str(en) <span class="string">'_mu_'</span> num2str(mu) <span class="string">'(:,dn,recv)= list_dn_recv_'</span> num2str(en) <span class="string">';'</span>])
+0128    eval([<span class="string">'BndInd.en_'</span> num2str(en) <span class="string">'_mu_'</span> num2str(mu) <span class="string">'(:,dn,send)= list_dn_send_'</span> num2str(en) <span class="string">';'</span>])
+0129    eval([<span class="string">'BndInd.en_'</span> num2str(en) <span class="string">'_mu_'</span> num2str(mu) <span class="string">'(:,up,send)= list_up_send_'</span> num2str(en) <span class="string">';'</span>])
+0130    eval([<span class="string">'BndInd.en_'</span> num2str(en) <span class="string">'_mu_'</span> num2str(mu) <span class="string">'(:,up,recv)= list_up_recv_'</span> num2str(en) <span class="string">';'</span>])
+0131   <span class="keyword">end</span>
+0132  <span class="keyword">end</span> <span class="comment">% imu=1:NPD</span>
+0133 
+0134 <span class="comment">% Note. BndInd is a struct, because matlab does not allow dimension mismatch in a single array (but the number</span>
+0135 <span class="comment">% of indices associated to different directions are necessarely different). Moreover, struct field names cannot</span>
+0136 <span class="comment">% be numerical variables. Hence, I had to use the ugly eval()'s above.</span>
+0137 
+0138 <span class="keyword">end</span> <span class="comment">% (EL~=L)</span>
+0139 
+0140 <span class="comment">% 5. define Comm structure in order to collect all variables related to neighbour addressing and communications</span>
+0141 
+0142 Comm.l=L;
+0143 Comm.el=EL;
+0144 Comm.pd=par_dirs;
+0145 Comm.neigh=Neigh;
+0146 Comm.extind=Ext_Ind;
+0147 Comm.flag=0;
+0148 <span class="keyword">if</span> (EL~=L)
+0149  Comm.neighnode=Neigh_Node;
+0150  Comm.bndind=BndInd;
+0151  Comm.mpirank=mpi_rank; <span class="comment">% do I need also MPI_COMM_WORLD ?</span>
+0152  Comm.flag=1;
+0153 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 16-Dec-2014 01:16:52 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

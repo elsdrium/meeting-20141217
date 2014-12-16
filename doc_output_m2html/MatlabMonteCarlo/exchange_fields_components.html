@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of exchange_fields_components</title>
+  <meta name="keywords" content="exchange_fields_components">
+  <meta name="description" content="FF = exchange_fields_components(FF,Comm,IndexComp)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html MatlabMonteCarlo -->
+<h1>exchange_fields_components
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>FF = exchange_fields_components(FF,Comm,IndexComp)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function FF = exchange_fields_components(FF,Comm,IndexComp) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> FF = exchange_fields_components(FF,Comm,IndexComp)
+
+ takes a field FF defined on each node and copies the boundaries of each node onto the mirror boundaries of
+ neighbours nodes. 
+
+ This function copies only the components defined below.
+
+ FF is assumed to be an 2 dimensional array. The first dimension can be of any size and it is copied as it is 
+ (here we think of spin, color, lorentz, replica, etc. A reshape/permute is tipically necessary). 
+ The second dimension represents the space-time index.
+
+ Comm is the communicator structure defined in init_geometry.
+ IndexComp selacts the components that should be sent
+
+ see also <a href="init_geometry.html" class="code" title="function Comm = init_geometry(GL,Nodes,indexord,thick)">init_geometry</a>, <a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a>, <a href="index_staples.html" class="code" title="function res=index_staples(L)">index_staples</a></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function FF = exchange_fields_components(FF,Comm,IndexComp)</a>
+0002 <span class="comment">% FF = exchange_fields_components(FF,Comm,IndexComp)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% takes a field FF defined on each node and copies the boundaries of each node onto the mirror boundaries of</span>
+0005 <span class="comment">% neighbours nodes.</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% This function copies only the components defined below.</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% FF is assumed to be an 2 dimensional array. The first dimension can be of any size and it is copied as it is</span>
+0010 <span class="comment">% (here we think of spin, color, lorentz, replica, etc. A reshape/permute is tipically necessary).</span>
+0011 <span class="comment">% The second dimension represents the space-time index.</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% Comm is the communicator structure defined in init_geometry.</span>
+0014 <span class="comment">% IndexComp selacts the components that should be sent</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% see also init_geometry, exchange_fields, index_staples</span>
+0017 <span class="comment">%</span>
+0018 
+0019 send=1; recv=2; up=1; dn=2;
+0020 size_of_ff=64 * size(FF,1); <span class="comment">%% ??? check with mpitb if size_of_double (=64) needs to be specified.</span>
+0021 
+0022 en=1;
+0023 <span class="keyword">for</span> mu=Comm.pd
+0024   eval([<span class="string">'bndi=Comm.BndInd.en_'</span> num2str(en) <span class="string">'_mu_'</span> num2str(mu) <span class="string">';'</span>])
+0025   siz=length(bndi(:,1,1));
+0026   <span class="comment">%    send mu+</span>
+0027   MPI_Send(FF(:,IndexComp(mu,up,send),bndi(:,up,send)),siz,size_of_ff,Comm.NeighNode(this_node,mu,up),<span class="keyword">...</span>
+0028        98,MPI_COMM_WORLD);
+0029   <span class="comment">%    recv mu-</span>
+0030   MPI_Recv(FF(:,IndexComp(mu,dn,recv),bndi(:,dn,recv)),siz,size_of_ff,Comm.NeighNode(this_node,mu,dn),<span class="keyword">...</span>
+0031        98,MPI_COMM_WORLD);
+0032   <span class="comment">%    send mu-</span>
+0033   MPI_Send(FF(:,IndexComp(mu,dn,send),bndi(:,dn,send)),siz,size_of_ff,Comm.NeighNode(this_node,mu,dn),<span class="keyword">...</span>
+0034        99,MPI_COMM_WORLD);
+0035   <span class="comment">%    recv mu+</span>
+0036   MPI_Recv(FF(:,IndexComp(mu,up,recv),bndi(:,up,recv)),siz,size_of_ff,Comm.NeighNode(this_node,mu,up),<span class="keyword">...</span>
+0037        99,MPI_COMM_WORLD);
+0038 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 16-Dec-2014 01:16:52 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

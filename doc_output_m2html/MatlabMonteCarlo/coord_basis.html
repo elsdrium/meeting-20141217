@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of coord_basis</title>
+  <meta name="keywords" content="coord_basis">
+  <meta name="description" content="[c_basis] = coord_basis(L,indexord)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html MatlabMonteCarlo -->
+<h1>coord_basis
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>[c_basis] = coord_basis(L,indexord)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [c_basis] = coord_basis(L,indexord) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> [c_basis] = coord_basis(L,indexord)
+ 
+ this subroutine constructs a vector that can be used to translate indices (= numbers going from 1 to V=prod(L))
+ into coordinates (=vectors whose i-th component goes from 0 to L(i)-1) and vice-versa.
+ It is used by coord2index() and by index2coord(), but can be used by other routines.
+ indexord is any permutation of [1:D]. It is the only thing that must be changed in the code in order to decide 
+ which coordinates run slow or fast. The fastest direction is indexord(1) and the slowest indexord(D).
+
+ With D=4 and default indexord (= [4 3 2 1]), we have:
+ c_basis = [L(2)*L(3)*L(4), L(3)*L(4), L(4), 1]
+ ind = x(4) + x(3)*L(4) + x(2)*L(3)*L(4) + x(1)*L(2)*L(3)*L(4) + 1
+ 
+ see also <a href="init_geometry.html" class="code" title="function Comm = init_geometry(GL,Nodes,indexord,thick)">init_geometry</a>, <a href="index2coord.html" class="code" title="function [coord] = index2coord(index,c_basis,indexord)">index2coord</a>, <a href="coord2index.html" class="code" title="function [index] = coord2index(coord,c_basis)">coord2index</a></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="fermion_ind_for_force_in_U.html" class="code" title="function [Iout_ferm Iout_gauge] = fermion_ind_for_force_in_U(ix,Iin,Comm,indexord)">fermion_ind_for_force_in_U</a>	%% SEGNO (tutto da ripensare cosa voglio)</li><li><a href="init_geometry.html" class="code" title="function Comm = init_geometry(GL,Nodes,indexord,thick)">init_geometry</a>	Comm = init_geometry(GL,Nodes,indexord,thick)</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [c_basis] = coord_basis(L,indexord)</a>
+0002 <span class="comment">% [c_basis] = coord_basis(L,indexord)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% this subroutine constructs a vector that can be used to translate indices (= numbers going from 1 to V=prod(L))</span>
+0005 <span class="comment">% into coordinates (=vectors whose i-th component goes from 0 to L(i)-1) and vice-versa.</span>
+0006 <span class="comment">% It is used by coord2index() and by index2coord(), but can be used by other routines.</span>
+0007 <span class="comment">% indexord is any permutation of [1:D]. It is the only thing that must be changed in the code in order to decide</span>
+0008 <span class="comment">% which coordinates run slow or fast. The fastest direction is indexord(1) and the slowest indexord(D).</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% With D=4 and default indexord (= [4 3 2 1]), we have:</span>
+0011 <span class="comment">% c_basis = [L(2)*L(3)*L(4), L(3)*L(4), L(4), 1]</span>
+0012 <span class="comment">% ind = x(4) + x(3)*L(4) + x(2)*L(3)*L(4) + x(1)*L(2)*L(3)*L(4) + 1</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% see also init_geometry, index2coord, coord2index</span>
+0015 
+0016 D=length(L);
+0017 
+0018 c_basis(indexord(1))=1;
+0019 <span class="keyword">for</span> mu=[2:D]
+0020   c_basis(indexord(mu))=c_basis(indexord(mu-1))*L(indexord(mu-1));
+0021 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 16-Dec-2014 01:16:52 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

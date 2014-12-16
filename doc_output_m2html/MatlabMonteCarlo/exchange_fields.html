@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of exchange_fields</title>
+  <meta name="keywords" content="exchange_fields">
+  <meta name="description" content="FF = exchange_fields(FF,Comm,MaxNumEdg)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html MatlabMonteCarlo -->
+<h1>exchange_fields
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>FF = exchange_fields(FF,Comm,MaxNumEdg)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function FF = exchange_fields(FF,Comm,MaxNumEdg) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> FF = exchange_fields(FF,Comm,MaxNumEdg)
+
+ takes a field FF defined on each node and copies the boundaries of each node onto the mirror boundaries of
+ neighbours nodes. 
+
+ FF is assumed to be an 2 dimensional array. The first dimension can be of any size and it is copied as it is 
+ (here we think of spin, color, lorentz, replica, etc. A reshape/permute is tipically necessary). 
+ The second dimension represents the space-time index.
+
+ Comm is the communicator structure defined in init_geometry.
+
+ MaxNumEdg is the higher level of corner that we need to communicate. E.g. For Wilson fermions it is 1; 
+ for Wilson loops it is 2; for D-dim hyp-smearing it is D.
+ 
+ see also <a href="init_geometry.html" class="code" title="function Comm = init_geometry(GL,Nodes,indexord,thick)">init_geometry</a>
+
+ ??? optimization
+ matlab advertizes its  &quot;copy on write&quot; that should avoid the duplication of unmodified variables (FF in this
+ case). but I am skeptic in this case because: 1. I modify part of an array and 2. I copy back to FF.
+ I guess I will have to define global fields and distinct exchange_** functions ... (give me pointers !!!!)</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="MolecularDynamics.html" class="code" title="function U = MolecularDynamics(U,@Mh,beta,ge,Nc,dt,N_MD,Comm)">MolecularDynamics</a>	U = MoleculerDynamics(U,@Mh,beta,ge,Nc,dt,N_MD,Comm)</li><li><a href="MolecularDynamicsRPhi.html" class="code" title="function U = MolecularDynamicsRPhi(U,@Mh,beta,ge,Nc,Nf,Nadj,dt,N_MD,algo,Comm)">MolecularDynamicsRPhi</a>	U = MoleculerDynamicsRPhi(U,@Mh,beta,ge,Nc,Nf,Nadj,dt,N_MD,algo,Comm)</li><li><a href="fermion_matrix.html" class="code" title="function psi1 = fermion_matrix(psi0,U,Ud,Comm,Nc,mass,gi,gv)">fermion_matrix</a>	usage:  psi1 = fermion_matrix(psi0,U,Ud,Comm,Nc,mass,gi,gv)</li><li><a href="hyp_smearing.html" class="code" title="function U = hyp_smearing(U,Nc,alpha,Comm)">hyp_smearing</a>	U = hyp_smearing(U,Nc,apha,Comm)</li><li><a href="init_gauge_fields.html" class="code" title="function U = init_gauge_fields(Nc, init_flag,alpha,filename,Comm)">init_gauge_fields</a>	U = init_gauge_fields(Nc, init_flag,alpha,filename,Comm)</li><li><a href="stout_smearing.html" class="code" title="function U = stout_smearing(U,Nc,Comm)">stout_smearing</a>	U = stout_smearing(U,Nc,Comm)</li><li><a href="wilson_loop.html" class="code" title="function wloop = wilson_loop(U,l1,dirs1,l2,dirs2,Comm)">wilson_loop</a>	wloop = wilson_loop(U,l1,dirs1,l2,dirs2,Comm)</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function FF = exchange_fields(FF,Comm,MaxNumEdg)</a>
+0002 <span class="comment">% FF = exchange_fields(FF,Comm,MaxNumEdg)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% takes a field FF defined on each node and copies the boundaries of each node onto the mirror boundaries of</span>
+0005 <span class="comment">% neighbours nodes.</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% FF is assumed to be an 2 dimensional array. The first dimension can be of any size and it is copied as it is</span>
+0008 <span class="comment">% (here we think of spin, color, lorentz, replica, etc. A reshape/permute is tipically necessary).</span>
+0009 <span class="comment">% The second dimension represents the space-time index.</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% Comm is the communicator structure defined in init_geometry.</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% MaxNumEdg is the higher level of corner that we need to communicate. E.g. For Wilson fermions it is 1;</span>
+0014 <span class="comment">% for Wilson loops it is 2; for D-dim hyp-smearing it is D.</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% see also init_geometry</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">% ??? optimization</span>
+0019 <span class="comment">% matlab advertizes its  &quot;copy on write&quot; that should avoid the duplication of unmodified variables (FF in this</span>
+0020 <span class="comment">% case). but I am skeptic in this case because: 1. I modify part of an array and 2. I copy back to FF.</span>
+0021 <span class="comment">% I guess I will have to define global fields and distinct exchange_** functions ... (give me pointers !!!!)</span>
+0022 
+0023 NPD=length(Comm.pd);
+0024 send=1; recv=2; up=1; dn=2;
+0025 size_of_ff=64 * size(FF,1); <span class="comment">%% ??? check with mpitb if size_of_double (=64) needs to be specified.</span>
+0026 
+0027 <span class="keyword">for</span> en=1:min(NPD,MaxNumEdg)
+0028  <span class="keyword">for</span> mu=Comm.pd
+0029   eval([<span class="string">'bndi=Comm.BndInd.en_'</span> num2str(en) <span class="string">'_mu_'</span> num2str(mu) <span class="string">';'</span>])
+0030   siz=length(bndi(:,1,1));
+0031   <span class="comment">%    send mu+</span>
+0032   MPI_Send(FF(:,bndi(:,up,send)),siz,size_of_ff,Comm.NeighNode(this_node,mu,up),98,MPI_COMM_WORLD);
+0033   <span class="comment">%    recv mu-</span>
+0034   MPI_Recv(FF(:,bndi(:,dn,recv)),siz,size_of_ff,Comm.NeighNode(this_node,mu,dn),98,MPI_COMM_WORLD);
+0035   
+0036   <span class="comment">%    send mu-</span>
+0037   MPI_Send(FF(:,bndi(:,dn,send)),siz,size_of_ff,Comm.NeighNode(this_node,mu,dn),99,MPI_COMM_WORLD);
+0038   <span class="comment">%    recv mu+</span>
+0039   MPI_Recv(FF(:,bndi(:,up,recv)),siz,size_of_ff,Comm.NeighNode(this_node,mu,up),99,MPI_COMM_WORLD);
+0040   <span class="keyword">end</span>
+0041 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Tue 16-Dec-2014 01:16:52 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

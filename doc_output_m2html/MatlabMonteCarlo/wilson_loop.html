@@ -1,0 +1,165 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of wilson_loop</title>
+  <meta name="keywords" content="wilson_loop">
+  <meta name="description" content="wloop = wilson_loop(U,l1,dirs1,l2,dirs2,Comm)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html MatlabMonteCarlo -->
+<h1>wilson_loop
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>wloop = wilson_loop(U,l1,dirs1,l2,dirs2,Comm)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function wloop = wilson_loop(U,l1,dirs1,l2,dirs2,Comm) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> wloop = wilson_loop(U,l1,dirs1,l2,dirs2,Comm)
+
+ Compute Wilson loop (= 1/V sum_x 1/n_dirs sum_{mu\in dirs1,nu \in dirs2} Re Tr[U_path(x,l1,mu,l2,nu)] ) 
+ where path(x,l1,mu,l2,nu) is a rectangular path of lengths l1 in direction mu and l2 in direction nu, 
+ starting from (its lowest) corner x.
+ dirs1 and dirs2 must be row vectors with a list of directions. The directions contained in dirs1 and dirs2 
+ must either the same set or be disjoint sets.
+
+ see also polyakov_loop</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a>	FF = exchange_fields(FF,Comm,MaxNumEdg)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function wloop = wilson_loop(U,l1,dirs1,l2,dirs2,Comm)</a>
+0002 <span class="comment">% wloop = wilson_loop(U,l1,dirs1,l2,dirs2,Comm)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Compute Wilson loop (= 1/V sum_x 1/n_dirs sum_{mu\in dirs1,nu \in dirs2} Re Tr[U_path(x,l1,mu,l2,nu)] )</span>
+0005 <span class="comment">% where path(x,l1,mu,l2,nu) is a rectangular path of lengths l1 in direction mu and l2 in direction nu,</span>
+0006 <span class="comment">% starting from (its lowest) corner x.</span>
+0007 <span class="comment">% dirs1 and dirs2 must be row vectors with a list of directions. The directions contained in dirs1 and dirs2</span>
+0008 <span class="comment">% must either the same set or be disjoint sets.</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% see also polyakov_loop</span>
+0011 
+0012 <span class="comment">%%%% 1. Define ll(dirs) and len_per_dir in order to deal with different cases uniformly.</span>
+0013 V=prod(Comm.l);
+0014 EV=prod(Comm.el);
+0015 i1=1;i2=1;
+0016 <span class="keyword">if</span>(dirs1==dirs2) <span class="comment">% CASE A: square loops, involving the same set of directions (e.g. space-like or any squares).</span>
+0017  len_per_dir=1; <span class="comment">% In this case I need to store only one Wilson Line per direction</span>
+0018  dirs=dirs1;
+0019  ll(dirs)=max(l1,l2);
+0020  <span class="keyword">if</span> (l1&lt;l2) <span class="comment">% CASE B: rectangles build with a single set of directions (e.g. space-like or any rectangles).</span>
+0021   len_per_dir=2; <span class="comment">% In this case I need to store 2 Wilson Lines per direction</span>
+0022   i1=2; i2=1;  <span class="comment">% the first is always the shorter</span>
+0023  <span class="keyword">elseif</span>(l2&lt;l1)
+0024   len_per_dir=2; 
+0025   i1=1; i2=2;  <span class="comment">% the first is always the shorter</span>
+0026  <span class="keyword">end</span>
+0027 <span class="keyword">elseif</span>(isempty(intersect(dirs1,dirs2))) <span class="comment">% CASE C: rectangles or squares out of non-overlapping sets of</span>
+0028                     <span class="comment">% directions (e.g. time-like loops).</span>
+0029  len_per_dir=1; <span class="comment">% In this case I need to store only one Wilson Line per direction</span>
+0030  dirs=union(dirs1,dirs2);
+0031  ll(dirs1)=l1;
+0032  ll(dirs2)=l2;
+0033 <span class="keyword">else</span>  <span class="comment">% CASE D: all other cases can be build out of the previous A, B, C.</span>
+0034  sprintf(<span class="string">'The row vectors dirs1 and dirs2 must be either the same set or disjoint sets. See help wilson_loop'</span>)
+0035 <span class="keyword">end</span>
+0036 
+0037 <span class="comment">%%%%% 2. Construct all the needed Wilson Lines and leave them on the leftmost (lowest) end: 'outward stars'.</span>
+0038 tmp=zeros(Nc,Nc,V);
+0039 Wline=zeros(Nc,Nc,EV,length(dirs),len_per_dir);
+0040 
+0041 <span class="keyword">for</span> imu=1:length(dirs)
+0042  mu=dirs(imu);
+0043  P_dn=Comm.neigh(Comm.extind,mu,2);
+0044  Wline(:,:,:,imu,1)=squeeze(U(:,:,mu,:)); <span class="comment">% First link of Wilson line in the mu direction</span>
+0045  <span class="keyword">if</span>( (len_per_dir == 2) &amp;&amp; (1==min(l1,l2)) ) <span class="comment">% If you need more lengths for the same direction (case B),</span>
+0046                          <span class="comment">% and if the shortest has length=1.</span>
+0047   Wline(:,:,:,imu,2)=Wline(:,:,:,imu,1);
+0048   Wline(:,:,:,imu,2)=reshape(<a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a>(reshape(Wline(:,:,:,imu,2),Nc*Nc,EV),Comm,1),Nc,Nc,EV); 
+0049  <span class="keyword">end</span>
+0050  <span class="keyword">for</span> m=2:ll(mu)
+0051    <span class="keyword">for</span> pnt=1:V
+0052      <span class="comment">% The Wilson line grows in the backward direction</span>
+0053      <span class="comment">% (note that tmp does not need to be defined on the boundaries).</span>
+0054      tmp(:,:,pnt) = U(:,:,mu,P_dn(pnt)) * Wline(:,:,Comm.extind(pnt),imu,1); 
+0055    <span class="keyword">end</span>
+0056    Wline(:,:,P_dn,imu,1)=tmp(:,:,:); <span class="comment">% Wline lives at the lowest end, where the Wilson line grows.</span>
+0057                      <span class="comment">% update and communicate borders of Wline</span>
+0058    Wline(:,:,:,imu,1)=reshape(<a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a>(reshape(Wline(:,:,:,imu,1),Nc*Nc,EV),Comm,1),Nc,Nc,EV); 
+0059 
+0060    <span class="keyword">if</span>( (len_per_dir == 2) &amp;&amp; (m==min(l1,l2)) ) <span class="comment">% If you need more lengths for the same direction (case B),</span>
+0061                           <span class="comment">% and if you are done with the shortest.</span>
+0062     Wline(:,:,:,imu,2)=Wline(:,:,:,imu,1);
+0063     Wline(:,:,:,imu,2)=reshape(<a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a>(reshape(Wline(:,:,:,imu,2),Nc*Nc,EV),Comm,1),Nc,Nc,EV); 
+0064    <span class="keyword">end</span>
+0065  <span class="keyword">end</span> <span class="comment">% m=1:ll(mu)</span>
+0066 <span class="keyword">end</span> <span class="comment">% imu=1:length(dirs)</span>
+0067 clear tmp
+0068 
+0069 <span class="comment">%%%% 3. Copy the Wilson Lines where they are needed and take the traces.</span>
+0070 
+0071 etmp=zeros(Nc,Nc,EV);
+0072 <span class="keyword">for</span> imu1=1:length(dirs1)
+0073  mu1=dirs1(imu1);
+0074  P_up1=Comm.neigh(Comm.extind,mu1,1);
+0075  <span class="keyword">for</span> imu2=1:length(dirs2)
+0076   <span class="keyword">if</span>((dirs1~=dirs2) || (imu2&gt;imu1) || (l1~=l2))
+0077    mu2=dirs2(imu2);
+0078    P_up2=Comm.neigh(Comm.extind,mu2,1);
+0079 
+0080    <span class="comment">% bring the mu2 wilson line back of l1 steps</span>
+0081    etmp(:,:,Comm.extind)=Wline(:,:,Comm.extind,imu2,i2);
+0082    <span class="keyword">for</span> m=1:l1
+0083     etmp(:,:,Comm.extind)=etmp(:,:,P_up1);
+0084     etmp=reshape(<a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a>(reshape(etmp,Nc*Nc,EV),Comm,1),Nc,Nc,EV);
+0085    <span class="keyword">end</span>
+0086 
+0087    <span class="comment">% form the staple mu2 - mu1 - mu2</span>
+0088    <span class="keyword">for</span> pnt=1:V
+0089     epnt=Comm.extind(pnt);
+0090     WL(:,:,pnt) = etmp(:,:,epnt) * Wline(:,:,epnt,imu1,i1) * Wline(:,:,epnt,imu2,i2)';
+0091    <span class="keyword">end</span>
+0092 
+0093    <span class="comment">% bring the mu1 wilson line back of l2 steps</span>
+0094    etmp(:,:,Comm.extind)=Wline(:,:,Comm.extind,imu1,i1);
+0095    <span class="keyword">for</span> m=1:l2
+0096     etmp(:,:,Comm.extind)=extind(:,:,P_up2);
+0097     etmp=reshape(<a href="exchange_fields.html" class="code" title="function FF = exchange_fields(FF,Comm,MaxNumEdg)">exchange_fields</a>(reshape(etmp,Nc*Nc,EV),Comm,1),Nc,Nc,EV);
+0098    <span class="keyword">end</span>
+0099 
+0100    <span class="comment">% close the staple with the last mu1</span>
+0101    <span class="keyword">for</span> pnt=1:V
+0102     epnt=Comm.extind(pnt);
+0103     WL(:,:,pnt) = etmp(:,:,epnt)' * WL(:,:,pnt);
+0104    <span class="keyword">end</span>
+0105 
+0106    <span class="comment">% Take the traces</span>
+0107    wloop(imu1,imu2)=mean(trace(WL(:,:,:)),3);
+0108 
+0109   <span class="keyword">end</span> <span class="comment">% if ( () || () || ())</span>
+0110  <span class="keyword">end</span> <span class="comment">% imu2</span>
+0111 <span class="keyword">end</span> <span class="comment">% imu1</span></pre></div>
+<hr><address>Generated on Tue 16-Dec-2014 01:16:52 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

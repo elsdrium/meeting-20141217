@@ -1,0 +1,77 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of source_gen</title>
+  <meta name="keywords" content="source_gen">
+  <meta name="description" content="eta = source_gen()">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html MatlabMonteCarlo -->
+<h1>source_gen
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>eta = source_gen()</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function eta = source_gen(L,Nc,DomainType,color_flag,spin_flag,spacetime_flags,Rep) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> eta = source_gen()
+
+ generate a set of N spin-color fields eta(c,s,x,i) (where c=1:Nc, s=2:S, x=...L, i=1:N).
+ with value in DomainType where
+ L=lattice sizes vector;
+ Nc = number of colors;
+ S = number of spin components;
+ DomainType can be: 1 (one), n (random-ZN), 0 (random-gauss), 0.5 (Z2+iZ2);
+ color_flag can be: 
+ c0 (delta for c=c0), Nc+1 (repeated delta forall c), Nc+2 (indep. foreach c), Nc+3 (constant forall c);
+ spin_flag can be: 
+ s0 (delta for s=s0), S+1 (repeated delta forall s), S+2 (indep. foreach s), S+3 (constant forall s);
+ spacetime_flag can be: 
+ x0 (delta for x(i)=x0(i)), x0(i)=L(i)+1 (repeated for all x0(i)), x0(i)=L(i)+2 (indep. foreach x0(i)), 
+ x0(i)=L(i)+3 (constant for all x0(i)).</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function eta = source_gen(L,Nc,DomainType,color_flag,spin_flag,spacetime_flags,Rep)</a>
+0002 <span class="comment">% eta = source_gen()</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% generate a set of N spin-color fields eta(c,s,x,i) (where c=1:Nc, s=2:S, x=...L, i=1:N).</span>
+0005 <span class="comment">% with value in DomainType where</span>
+0006 <span class="comment">% L=lattice sizes vector;</span>
+0007 <span class="comment">% Nc = number of colors;</span>
+0008 <span class="comment">% S = number of spin components;</span>
+0009 <span class="comment">% DomainType can be: 1 (one), n (random-ZN), 0 (random-gauss), 0.5 (Z2+iZ2);</span>
+0010 <span class="comment">% color_flag can be:</span>
+0011 <span class="comment">% c0 (delta for c=c0), Nc+1 (repeated delta forall c), Nc+2 (indep. foreach c), Nc+3 (constant forall c);</span>
+0012 <span class="comment">% spin_flag can be:</span>
+0013 <span class="comment">% s0 (delta for s=s0), S+1 (repeated delta forall s), S+2 (indep. foreach s), S+3 (constant forall s);</span>
+0014 <span class="comment">% spacetime_flag can be:</span>
+0015 <span class="comment">% x0 (delta for x(i)=x0(i)), x0(i)=L(i)+1 (repeated for all x0(i)), x0(i)=L(i)+2 (indep. foreach x0(i)),</span>
+0016 <span class="comment">% x0(i)=L(i)+3 (constant for all x0(i)).</span>
+0017 <span class="comment">%</span></pre></div>
+<hr><address>Generated on Tue 16-Dec-2014 01:16:52 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>
